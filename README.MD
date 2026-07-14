@@ -43,6 +43,12 @@ brew install azure-cli
 brew tap hashicorp/tap && brew install hashicorp/tap/terraform
 ```
 
+Clone the repo
+```bash
+git clone https://github.com/bmcfarlane/panos-iac-lab.git
+cd panos-iac-lab
+```
+
 ### 2. Log into Azure
 
 ```bash
