@@ -1,0 +1,12 @@
+# Terraform state contains secrets (fw_admin_password) in PLAINTEXT.
+*.tfstate
+*.tfstate.*
+.terraform/
+crash.log
+
+# Real variable values — never commit
+terraform.tfvars
+*.auto.tfvars
+
+# Other things
+.DS_Store

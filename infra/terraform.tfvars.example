@@ -1,0 +1,13 @@
+name_prefix = "panos-iac-lab"
+region      = "<my-azure-region-here>"
+
+# Get a real value, see README 
+panos_version = "<desired-version-num-here>"
+
+fw_admin_username = "panadmin"
+
+# fw_admin_password is NOT set here on purpose. Export it instead.
+
+# Your workstation's public IP as a /32. 203.0.113.45 is an RFC 5737 Example IP
+
+mgmt_allowed_source_ip = "203.0.113.45/32"
