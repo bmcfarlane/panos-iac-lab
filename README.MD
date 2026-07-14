@@ -72,7 +72,7 @@ The firewall uses the BYOL image, so accept its terms before deploying:
 az vm image terms accept --publisher paloaltonetworks --offer vmseries-flex --plan byol
 ```
 
-### 5. — Deploy the firewall (`infra`)
+### 5. Deploy the firewall (`infra`)
 ```bash
 cd infra
 cp terraform.tfvars.example terraform.tfvars
@@ -128,3 +128,66 @@ Once port 443 answers, browse to `https://<mgmt-ip>`, accept the self-signed cer
 warning, and log in as `panadmin` with the password you set. Confirm the PAN-OS version on the
 dashboard matches your `panos_version`.
 
+### 7. Configure the firewall (`config`)
+Hand the management IP and credentials to the config root (same terminal session):
+
+```bash
+export PANOS_HOSTNAME="<your-pa-vm-managment-IP-here>"
+export PANOS_USERNAME="panadmin"
+export PANOS_PASSWORD="$TF_VAR_fw_admin_password"
+
+cd ../config
+terraform plan             # expect: create the address object + a triggered commit action
+terraform apply
+```
+
+On a freshly built firewall the address object is genuinely *created*, so the `panos_commit`
+action fires automatically on `after_create` — the change is written **and** committed in one
+`apply`.
+
+### 8. Verify the commit
+In the PAN-OS GUI:
+
+- **Objects → Addresses** — the `web-server` object is present.
+- **Commit** button (top-right) — the pending-change indicator is **clear**.
+- **Tasks** (bottom-right) — a **Commit** job shows **Completed**, timestamped to your apply.
+
+Back in the terminal, `terraform plan` should report **"No changes."** (Note: "No changes"
+alone doesn't prove the *commit* — the Tasks log is the real evidence.)
+
+### 9. Teardown
+Two roots, so two destroys. **The `infra` destroy is what stops Azure billing.**
+
+```bash
+cd ../config && terraform destroy    # optional; removes the address from candidate config
+cd ../infra  && terraform destroy    # deletes the firewall, network, and RG — stops billing
+```
+> The out-of-band commit does not fire on destroy (`action_trigger` has no destroy event), so a
+> config-only destroy leaves the object removal uncommitted — irrelevant here because you then
+> delete the whole firewall.
+Confirm everything's gone:
+
+```bash
+az group show -g <name_prefix>-rg    # should error "not found"
+```
+
+After destroying, the local state files are safe to delete (they describe resources that no
+longer exist). **Do this only because you destroyed first** — never delete state for live
+infrastructure:
+
+```bash
+rm -f infra/terraform.tfstate* config/terraform.tfstate*
+```
+
+## Security notes
+
+- **State can contain secrets in plaintext.** For example, the firewall admin password is
+  written into `infra`'s state after apply — even though you passed it via an environment
+  variable, Terraform records the resolved value. State (and its `.backup`) is gitignored via
+  the `*.tfstate*` pattern and should use a remote, encrypted backend beyond a throwaway lab.
+  Marking a variable `sensitive` only hides it from CLI output — it does **not** encrypt state.
+- **No credentials in code.** The admin password and subscription ID are passed via environment
+  variables, never committed.
+- **Management access is locked to a single IP** via an NSG rule
+
+---
