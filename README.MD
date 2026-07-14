@@ -23,10 +23,47 @@ state; Terraform computes and applies the difference, rather than you pushing co
 The core workflow: init → plan → apply → destroy, and reading a plan before approving it.
 
 
-Separation of concerns across two root modules — "build the firewall" and "configure
+Separation of concerns across two root modules: "build the firewall" and "configure
 the firewall" are kept in independent Terraform roots with independent state, connected
 only by an output handoff.
 
 
 Secrets hygiene — credentials supplied via environment variables, state and tfvars kept
 out of version control, firewall management locked to a single source IP.
+
+
+## Instructions for Use
+
+### 1. Install the Tools
+
+The tools were downloaded to my Macbook using Brew Package Manager and the instructions for this section reflect that. You can probably get these tools from other means on other platforms.
+
+```bash
+brew install azure-cli
+brew tap hashicorp/tap && brew install hashicorp/tap/terraform
+```
+
+### 2. Log into Azure
+
+```bash
+az login
+```
+
+Then select the subscription this lab should build into:
+
+```bash
+az account list --output table                 # all subscriptions you can access
+az account set --subscription "<name-or-id>"   # pick the lab one
+az account show                                # confirm the active subscription
+```
+
+> Wrong tenant? `az login --tenant <tenant-id>` forces a specific one.
+
+### 3. Permissions
+
+Your Azure identity needs rights to create resources — typically **Contributor** on the
+subscription or the target resource group. If you already do portal admin you almost certainly
+have this; it's the first thing to check if `terraform apply` fails with an authorization error.
+
+
+
