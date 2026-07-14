@@ -91,6 +91,8 @@ Edit `terraform.tfvars` and set at least:
 - `mgmt_allowed_source_ip` — **your** workstation's public IP as a `/32` (e.g. `203.0.113.45/32`).
   This is the only source allowed to reach the firewall's management interface.
 
+- `region` - set the Azure region applicable to your lab (e.g. canadacentral)
+
 Set the secrets as environment variables (never in a file):
 
 ```bash
