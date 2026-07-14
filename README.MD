@@ -87,6 +87,7 @@ Edit `terraform.tfvars` and set at least:
   Use a version from a row whose SKU is `byol` (ignore `bundle*`). A 10.2.x build (e.g.
   `10.2.1014`) comfortably fits the default `Standard_D3_v2` size; 11.x/12.x images want more
   memory, so bump the VM size if you choose one.
+
 - `mgmt_allowed_source_ip` — **your** workstation's public IP as a `/32` (e.g. `203.0.113.45/32`).
   This is the only source allowed to reach the firewall's management interface.
 
